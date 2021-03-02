@@ -5,6 +5,12 @@ Copyright 2008 Google Inc.
 
 https://developers.google.com/protocol-buffers/
 
+Patch History
+-------------
+
+This repository contains the patches for my Unity projects.
+- (3.15.3) Fixed a memory alignment issue that can cause a crash. Confirmed on Unity IL2CPP + ARMv7.
+
 Overview
 --------
 
