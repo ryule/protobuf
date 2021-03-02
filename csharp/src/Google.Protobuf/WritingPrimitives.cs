@@ -68,8 +68,16 @@ namespace Google.Protobuf
             {
                 // if there's enough space in the buffer, write the float directly into the buffer
                 var floatSpan = buffer.Slice(state.position, length);
+#if UNITY_ANDROID
+                fixed (byte* destination = &MemoryMarshal.GetReference(floatSpan))
+                {
+                    byte* source = (byte*)&value;
+                    for (int idx = 0; idx < length; ++idx)
+                        destination[idx] = source[idx];
+                }
+#else
                 Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(floatSpan), value);
-
+#endif
                 if (!BitConverter.IsLittleEndian)
                 {
                     floatSpan.Reverse();
@@ -89,7 +97,16 @@ namespace Google.Protobuf
 
             // TODO(jtattermusch): deduplicate the code. Populating the span is the same as for the fastpath.
             Span<byte> floatSpan = stackalloc byte[length];
+#if UNITY_ANDROID
+            fixed (byte* destination = &MemoryMarshal.GetReference(floatSpan))
+            {
+                byte* source = (byte*)&value;
+                for (int idx = 0; idx < length; ++idx)
+                    destination[idx] = source[idx];
+            }
+#else
             Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(floatSpan), value);
+#endif
             if (!BitConverter.IsLittleEndian)
             {
                 floatSpan.Reverse();

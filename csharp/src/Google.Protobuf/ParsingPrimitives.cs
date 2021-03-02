@@ -386,7 +386,18 @@ namespace Google.Protobuf
                 return BitConverter.Int64BitsToDouble((long)ParseRawLittleEndian64(ref buffer, ref state));
             }
             // ReadUnaligned uses processor architecture for endianness.
+#if UNITY_ANDROID
+            double result;
+            unsafe
+            {
+                byte* temp = stackalloc byte[length];
+                for (var idx = 0; idx < length; idx++)
+                    temp[idx] = buffer[state.bufferPos + idx];
+                result = *(double*)temp;
+            }
+#else
             double result = Unsafe.ReadUnaligned<double>(ref MemoryMarshal.GetReference(buffer.Slice(state.bufferPos, length)));
+#endif
             state.bufferPos += length;
             return result;
         }
@@ -402,7 +413,18 @@ namespace Google.Protobuf
                 return ParseFloatSlow(ref buffer, ref state);
             }
             // ReadUnaligned uses processor architecture for endianness.
+#if UNITY_ANDROID
+            float result;
+            unsafe
+            {
+                byte* temp = stackalloc byte[length];
+                for (var idx = 0; idx < length; idx++)
+                    temp[idx] = buffer[state.bufferPos + idx];
+                result = *(float*)temp;
+            }
+#else
             float result = Unsafe.ReadUnaligned<float>(ref MemoryMarshal.GetReference(buffer.Slice(state.bufferPos, length)));
+#endif
             state.bufferPos += length;
             return result;  
         }
@@ -422,7 +444,11 @@ namespace Google.Protobuf
             {
                 tempSpan.Reverse();
             }
+#if UNITY_ANDROID
+            return *(float*)stackBuffer;
+#else
             return Unsafe.ReadUnaligned<float>(ref MemoryMarshal.GetReference(tempSpan));
+#endif
         }
 
         /// <summary>
